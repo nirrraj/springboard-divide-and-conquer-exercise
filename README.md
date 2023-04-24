@@ -15,6 +15,32 @@ countZeroes([1,0,0,0,0]) // 4
 countZeroes([0,0,0]) // 3
 countZeroes([1,1,1,1]) // 0</pre>
 
+Solution:
+<pre>
+function countZeroes(arr) {
+  let firstZeroIdx = binarySearchForFirstZero(arr);
+  
+  if(firstZeroIdx === -1){ 
+    return 0; 
+  }
+
+  return arr.length - firstZeroIdx;
+}
+
+function binarySearchForFirstZero(arr, low = 0, high = arr.length - 1) {
+  if (high >= low) {
+    let mid = low + Math.floor((high - low) / 2);
+    if ((mid === 0 || arr[mid - 1] === 1) && arr[mid] === 0) {
+      return mid;
+    } else if (arr[mid] === 1) {
+      return binarySearchForFirstZero(arr, mid + 1, high)
+    }
+    return binarySearchForFirstZero(arr, low, mid - 1)
+  }
+  return -1;
+}
+</pre>
+
 sortedFrequency
 ---
 
@@ -27,6 +53,44 @@ Examples:
 sortedFrequency([1,1,2,2,2,2,3],3) // 1
 sortedFrequency([1,1,2,2,2,2,3],1) // 2
 sortedFrequency([1,1,2,2,2,2,3],4) // -1</pre>
+
+Solution:
+<pre>
+function sortedFrequency(arr, num) {
+  let firstIdx = findFirst(arr, num);
+  if (firstIdx == -1) return firstIdx;
+  let lastIdx = findLast(arr, num);
+  return lastIdx - firstIdx + 1;
+}
+
+function findFirst(arr, num, low = 0, high = arr.length - 1) {
+  if (high >= low) {
+    let mid = Math.floor((low + high) / 2)
+    if ((mid === 0 || num > arr[mid - 1]) && arr[mid] === num) {
+      return mid;
+    } else if (num > arr[mid]) {
+      return findFirst(arr, num, mid + 1, high)
+    } else {
+      return findFirst(arr, num, low, mid - 1)
+    }
+  }
+  return -1
+}
+
+function findLast(arr, num, low = 0, high = arr.length - 1) {
+  if (high >= low) {
+    let mid = Math.floor((low + high) / 2)
+    if ((mid === arr.length - 1 || num < arr[mid + 1]) && arr[mid] === num) {
+      return mid;
+    } else if (num < arr[mid]) {
+      return findLast(arr, num, low, mid - 1)
+    } else {
+      return findLast(arr, num, mid + 1, high)
+    }
+  }
+  return -1
+}
+</pre>
 
 findRotatedIndex
 ---
@@ -42,6 +106,54 @@ findRotatedIndex([6, 7, 8, 9, 1, 2, 3, 4], 3) // 6
 findRotatedIndex([37,44,66,102,10,22],14) // -1
 findRotatedIndex([6, 7, 8, 9, 1, 2, 3, 4], 12) // -1</pre>
 
+Solution:
+<pre>
+function findRotatedIndex(array, num) {
+  let pivot = findPivot(array)
+  if (pivot > 0 && num >= array[0] && num <= array[pivot - 1]) {
+    return binarySearch(array, num, 0, pivot - 1);
+  } else {
+    return binarySearch(array, num, pivot, array.length - 1);
+  }
+}
+
+function binarySearch(array, num, start, end) {
+  if (array.length === 0) return -1;
+  if (num < array[start] || num > array[end]) return -1;
+
+  while (start <= end) {
+    let mid = Math.floor((start + end) / 2);
+    if (array[mid] === num) {
+      return mid;
+    } else if (num < array[mid]) {
+      end = mid - 1;
+    } else {
+      start = mid + 1;
+    }
+  }
+  return -1;
+}
+
+function findPivot(arr) {
+  if (arr.length === 1 || arr[0] < arr[arr.length - 1]){
+    return 0;
+   }
+  let start = 0;
+  let end = arr.length - 1;
+  while (start <= end) {
+    let mid = Math.floor((start + end) / 2);
+    if (arr[mid] > arr[mid + 1]){
+      return mid + 1;
+    }
+    else if (arr[start] <= arr[mid]) {
+      start = mid + 1;
+    } else {
+      end = mid - 1;
+    }
+  }
+}
+</pre>
+
 findRotationCount
 ---
 
@@ -54,6 +166,34 @@ Examples:
 findRotationCount([7, 9, 11, 12, 5]) // 4
 findRotationCount([7, 9, 11, 12, 15]) // 0</pre>
 
+Solution:
+<pre>
+function findRotationCount(arr, low = 0, high = arr.length - 1) {
+  if (high < low){
+    return 0;
+  }
+  if (high === low){
+    return low;
+  }
+  
+  let mid = Math.floor((low + high) / 2);
+
+  if (mid < high && arr[mid + 1] < arr[mid]){
+    return mid + 1;
+  }
+  
+  if (mid > low && arr[mid] < arr[mid - 1]) {
+    return mid;
+  }
+
+  if (arr[high] > arr[mid]) {
+    return findRotationCount(arr, low, mid - 1);
+  }
+
+  return findRotationCount(arr, mid + 1, high);
+}
+</pre>
+
 findFloor
 ---
 
@@ -65,3 +205,32 @@ Examples:
 <pre>findFloor([1,2,8,10,10,12,19], 9) // 8
 findFloor([1,2,8,10,10,12,19], 20) // 19
 findFloor([1,2,8,10,10,12,19], 0) // -1</pre>
+
+Solution:
+<pre>
+function findFloor(arr, num, low = 0, high = arr.length - 1) {
+  if (low > high){ 
+    return -1;
+   }
+   
+  if (num >= arr[high]){
+    return arr[high];
+  }
+
+  let mid = Math.floor((low + high) / 2)
+
+  if (arr[mid] === num){
+    return arr[mid];
+   }
+
+  if (mid > 0 && arr[mid - 1] <= num && num < arr[mid]) {
+    return arr[mid - 1];
+  }
+
+  if (num < arr[mid]) {
+    return findFloor(arr, num, low, mid - 1);
+  }
+
+  return findFloor(arr, num, mid + 1, high)
+}
+</pre>
